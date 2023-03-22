@@ -9,18 +9,26 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import ru.worklight64.bluetoothterminal.adapter.BluetoothListAdapter
 import ru.worklight64.bluetoothterminal.databinding.ActivityMainBinding
+import ru.worklight64.bluetoothterminal.dataclass.BluetoothItem
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var form: ActivityMainBinding
     private var btAdapter: BluetoothAdapter? = null
+    private lateinit var adapter: BluetoothListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         form = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(form.root)
+        adapter = BluetoothListAdapter()
+        form.rcBluetoothDevice.layoutManager = LinearLayoutManager(this)
+        form.rcBluetoothDevice.adapter = adapter
         initializeBluetooth()
     }
 
@@ -50,9 +58,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pairedDevices: Set<BluetoothDevice>? = btAdapter?.bondedDevices
+        val tempList = ArrayList<BluetoothItem>()
         pairedDevices?.forEach{
             form.tvEmpty.append(it.name)
+            tempList.add(BluetoothItem(it.name, it.address))
         }
+        if (tempList.isNotEmpty()) form.tvEmpty.visibility = View.GONE
+        adapter.submitList(tempList)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
