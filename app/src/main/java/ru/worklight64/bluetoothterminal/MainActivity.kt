@@ -1,5 +1,7 @@
 package ru.worklight64.bluetoothterminal
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -14,6 +16,8 @@ import ru.worklight64.bluetoothterminal.dataclass.BluetoothItem
 class MainActivity : AppCompatActivity() {
     private lateinit var form: ActivityMainBinding
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
+    lateinit var bluetoothConnection: BluetoothConnection
+    private var listItem: BluetoothItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         form = ActivityMainBinding.inflate(layoutInflater)
@@ -21,6 +25,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(form.root)
 
         onBluetoothListResult()
+
+        val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val btAdapter = btManager.adapter
+        bluetoothConnection = BluetoothConnection(btAdapter)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -29,9 +38,11 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.id_connect){
-            activityLauncher.launch(Intent(this, BluetoothListActivity::class.java))
+            listItem.let {
+                bluetoothConnection.connect(it?.mac!!)
+            }
         } else if (item.itemId == R.id.id_list){
-
+            activityLauncher.launch(Intent(this, BluetoothListActivity::class.java))
         }
 
         return super.onOptionsItemSelected(item)
@@ -41,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         activityLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()){
             if (it.resultCode == RESULT_OK){
-                form.tvEmpty.text = (it.data?.getSerializableExtra(BluetoothListActivity.DEVICE_KEY) as BluetoothItem).name
+                listItem = it.data?.getSerializableExtra(BluetoothListActivity.DEVICE_KEY) as BluetoothItem
             }
         }
     }
