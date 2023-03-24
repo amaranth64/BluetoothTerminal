@@ -6,7 +6,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-class BluetoothIOThread(private val bluetoothSocket: BluetoothSocket): Thread() {
+class BluetoothIOThread(bluetoothSocket: BluetoothSocket, private val receiveDataListener: ReceiveDataListener): Thread() {
 
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
@@ -26,12 +26,13 @@ class BluetoothIOThread(private val bluetoothSocket: BluetoothSocket): Thread() 
     }
 
     override fun run() {
-        val buffer = ByteArray(50)
+        val buffer = ByteArray(256)
         while (true){
             try {
                 val size = inputStream?.read(buffer)
                 val message = String(buffer, 0, size!!)
                 Log.d("MyLog", "Message: $message")
+                receiveDataListener.onBluetoothReceive(message)
             } catch (i: IOException){
 
             }
@@ -44,6 +45,10 @@ class BluetoothIOThread(private val bluetoothSocket: BluetoothSocket): Thread() 
         }catch (i: IOException){
 
         }
+    }
+
+    interface ReceiveDataListener{
+        fun onBluetoothReceive(data: String)
     }
 
 }

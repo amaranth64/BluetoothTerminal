@@ -13,7 +13,7 @@ import ru.worklight64.bluetoothterminal.databinding.ActivityMainBinding
 import ru.worklight64.bluetoothterminal.dataclass.BluetoothItem
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BluetoothIOThread.ReceiveDataListener {
     private lateinit var form: ActivityMainBinding
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
     lateinit var bluetoothConnection: BluetoothConnection
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         val btManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val btAdapter = btManager.adapter
-        bluetoothConnection = BluetoothConnection(btAdapter)
+        bluetoothConnection = BluetoothConnection(btAdapter, this)
 
         form.bMsgLedOn.setOnClickListener {
             bluetoothConnection.sendMessage("*L:1;")
@@ -64,6 +64,13 @@ class MainActivity : AppCompatActivity() {
                 listItem = it.data?.getSerializableExtra(BluetoothListActivity.DEVICE_KEY) as BluetoothItem
             }
         }
+    }
+
+    override fun onBluetoothReceive(data: String) {
+        runOnUiThread {
+            form.tvEmpty.append(data)
+        }
+
     }
 
 }

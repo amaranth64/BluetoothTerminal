@@ -6,9 +6,9 @@ import android.util.Log
 import java.io.IOException
 import java.util.*
 
-class ConnectionThread(private val device: BluetoothDevice): Thread() {
+class ConnectionThread(device: BluetoothDevice, private val receiveDataListener: BluetoothIOThread.ReceiveDataListener): Thread() {
     private val uuid = "00001101-0000-1000-8000-00805F9B34FB"
-    var mSocket: BluetoothSocket? = null
+    private var mSocket: BluetoothSocket? = null
     lateinit var ioThread: BluetoothIOThread
     init {
         try {
@@ -21,12 +21,15 @@ class ConnectionThread(private val device: BluetoothDevice): Thread() {
     override fun run() {
         try {
             Log.d("MyLog","Connecting...")
+            receiveDataListener.onBluetoothReceive("Connecting...")
             mSocket?.connect()
             Log.d("MyLog","Connected")
-            ioThread = BluetoothIOThread(mSocket!!)
+            receiveDataListener.onBluetoothReceive("Connected")
+            ioThread = BluetoothIOThread(mSocket!!, receiveDataListener)
             ioThread.start()
         }catch (i: IOException){
             Log.d("MyLog","Can not connect to device")
+            receiveDataListener.onBluetoothReceive("Can not connect to device")
             closeConnection()
         }
     }
