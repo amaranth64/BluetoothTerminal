@@ -14,4 +14,8 @@ class BluetoothConnection(private val adapter: BluetoothAdapter) {
         }
     }
 
+    fun sendMessage(mgs: String){
+        cThread.ioThread.sendMessage(mgs.toByteArray())
+    }
+
 }

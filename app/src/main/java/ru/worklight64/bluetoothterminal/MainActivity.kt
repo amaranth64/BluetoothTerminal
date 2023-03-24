@@ -30,6 +30,15 @@ class MainActivity : AppCompatActivity() {
         val btAdapter = btManager.adapter
         bluetoothConnection = BluetoothConnection(btAdapter)
 
+        form.bMsgLedOn.setOnClickListener {
+            bluetoothConnection.sendMessage("*L:1;")
+        }
+
+
+        form.bMsgLedOff.setOnClickListener {
+            bluetoothConnection.sendMessage("*L:0;")
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
